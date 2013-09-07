@@ -7,7 +7,11 @@
     "requirejs": "git://github.com/jrburke/requirejs#2.1.5",
     "raphael": "git://github.com/DmitryBaranovskiy/raphael.git#2.1.0",
     "modernizr": "git://github.com/Modernizr/Modernizr.git#2.6.2",
+<<<<<<< HEAD:app/templates/bower.json
     "bootstrap": "https://github.com/twbs/bootstrap",
+=======
+    "bootstrap": "git://github.com/twbs/bootstrap#2.1.1",
+>>>>>>> refs/heads/upd-bower-components:app/templates/bower.json
     "requirejs-text": "git://github.com/requirejs/text#2.0.5",
     "domReady": "git://github.com/requirejs/domReady.git#2.0.1",
     "underscore": "git://github.com/documentcloud/underscore.git#1.4.4"

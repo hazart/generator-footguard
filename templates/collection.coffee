@@ -1,9 +1,9 @@
 define [
 	'backbone'<% if( model ) { %>
-	'app/models/<% if( folder ) { print(folder +"/"); } %><%= model %>_model' <% } %>
-], (Backbone<% if( model ) { print(", " + _.classify(model)); } %>)->
+	'models/<%= modelName %>_model'<% } %>
+], (Backbone<% if( model ) { print(", " + _.classify(modelName)); } %>)->
 	
 	class <%= _.classify(name) %>Collection extends Backbone.Collection
 		<% if( model ) { %>
-		model: <%= _.classify(model) %>
+		model: <%= _.classify(modelName) %>
 		<% } %>
