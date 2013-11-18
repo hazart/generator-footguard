@@ -4,6 +4,9 @@ Maintainer: [Alexandre Koch](https://github.com/hazart/generator-pr0d/)
 
 Based on [yeoman-generator](https://github.com/yeoman/yeoman-generator/)
 
+Inspired by [generator-footguard](https://github.com/mazerte/generator-footguard)
+Thanks to Mathieu Desvé for his advices (https://github.com/mazerte/)
+
 ## Usage
 
 First make a new directory, and `cd` into it:
