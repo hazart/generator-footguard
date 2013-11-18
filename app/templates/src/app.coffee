@@ -1,5 +1,5 @@
 define [
-	'app/router'
+	'router'
 	'config'
 ], (Router)->
 

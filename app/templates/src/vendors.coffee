@@ -5,7 +5,10 @@ define [
 	'domReady'
 	'backbone'
 	'modernizr'
+	'gsap'
 
-	'app/helpers/underscore_mixin'
-	'app/helpers/modernizr_test'
+	'helpers/underscore_mixin'
+	'helpers/modernizr_test'
+
+	'jquery.cookie'
 ], ()->

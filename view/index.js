@@ -33,8 +33,13 @@ Generator.prototype.askFor = function askFor (argument) {
 		default: 'Y/n'
 	},
 	{
-		name: 'sass',
-		message: 'Would you like to create associate sass file (' + this.name + ')?',
+		name: 'styl',
+		message: 'Would you like to create associate stylus file (' + this.name + ')?',
+		default: 'Y/n'
+	},
+	{
+		name: 'module',
+		message: 'Would you like to create associate require module (' + this.name + ')?',
 		default: 'Y/n'
 	}];
   
@@ -61,12 +66,21 @@ Generator.prototype.askFor = function askFor (argument) {
 			}
 		}
 		
-		self.sass = self.name;
-		if( props.sass != "Y/n" ) {
-			if( props.sass == "n" ) {
-				self.sass = false;
+		self.styl = self.name;
+		if( props.styl != "Y/n" ) {
+			if( props.styl == "n" ) {
+				self.styl = false;
 			} else {
-				self.sass = props.sass;
+				self.styl = props.styl;
+			}
+		}
+
+		self.module = self.name;
+		if( props.module != "Y/n" ) {
+			if( props.module == "n" ) {
+				self.module = false;
+			} else {
+				self.module = props.module;
 			}
 		}
 		
@@ -93,23 +107,25 @@ Generator.prototype.createViewFiles = function createCollectionFiles() {
 		mg.createModelFiles();
 	}
 	
-	if( this.sass ) {
-		this.template('view.sass', path.join('src/views', this.folder, '_' + this.fileName + '.sass'));
-		var file = 'src/main.sass';
-		var body = grunt.file.read(file);
-
-		body = generatorUtil.rewrite({
-			needle: '// <here> don\'t remove this comment',
-			haystack: body,
-			splicable: [
-				'@import ' + path.join('views/' + this.folder + '/' + this.fileName)
-			]
-		});
-
-		grunt.file.write(file, body);
+	if( this.styl ) {
+		this.template('view.styl', path.join('src/views', this.folder, this.fileName + '.styl'));
 	}
 	
 	if( this.tpl ) {
 		this.template('view.jade', path.join('src/views', this.folder, this.fileName + '.jade'));
+	}
+
+	if( this.module ) {
+		var file = 'Gruntfile.coffee';
+		var body = grunt.file.read(file);
+
+		body = generatorUtil.rewrite({
+			needle: '# view modules',
+			haystack: body,
+			splicable: [
+				'						{ name: \'views/'+this.folder+'/'+this.fileName+'_view\', exclude: [\'config\', \'app\', \'vendors\'] }' 
+			]
+		});
+		grunt.file.write(file, body);
 	}
 };

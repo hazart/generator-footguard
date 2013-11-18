@@ -1,6 +1,6 @@
-# Footguard generator
+# PR0D generator
 
-Maintainer: [Mathieu Desvé](https://github.com/mazerte)
+Maintainer: [Alexandre Koch](https://github.com/hazart/generator-pr0d/)
 
 Based on [yeoman-generator](https://github.com/yeoman/yeoman-generator/)
 
@@ -11,36 +11,39 @@ First make a new directory, and `cd` into it:
 mkdir my-new-project && cd $_
 ```
 
-Then install `generator-footguard`:
+Then install `generator-pr0d`:
 ```
-npm install -g generator-footguard
-```
-
-Run `yo footguard`, optionally passing an app name:
-```
-yo footguard
+npm install -g generator-pr0d
 ```
 
-Finally, install npm and bower dependencies:
+Run `yo pr0d`, optionally passing an app name:
 ```
-npm install && bower install --dev
+yo pr0d
+```
+
+To see the result launch:
+```
+grunt
 ```
 
 ## Generators
 
 Available generators:
 
-* [footguard](#app) (aka [footguard:app](#app))
-* [footguard:collection](#collection)
-* [footguard:model](#model)
-* [footguard:helper](#helper)
-* [footguard:view](#view)
+* [pr0d](#app) (aka [pr0d:app](#app))
+* [pr0d:collection](#collection)
+* [pr0d:model](#model)
+* [pr0d:view](#view)
 
 ## Commands
 
 Available commands:
 
-* [grunt server](#server)
+* [grunt](#server)
+* [grunt server-dist](#server-dist)
 * [grunt compile](#compile)
 * [grunt build](#build)
-* [grunt server-dist](#server-dist)
+* [grunt seo](#seo)
+* [grunt seo-preprod](#seo-preprod)
+* [grunt deploy](#deploy)
+* [grunt deploy-preprod](#deploy-preprod)

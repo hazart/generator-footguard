@@ -1,19 +1,19 @@
 define [
 	'backbone'
 	'underscore'
-	'text!templates/app.html'
-], (Bacbone, _, tpl)->
+	'config'
+	'text!templates/app/app.html'
+], (Backbone, _, Config, tpl)->
 
 	class App extends Backbone.View
 		
 		el: "#total"
-		
-		events: {}
+
+		events: {}		
 		
 		initialize: (options)->
-			
-			
+
 		render: ->
 			@$el.html _.template( tpl, {  } )
-			
+
 	appView = new App()
