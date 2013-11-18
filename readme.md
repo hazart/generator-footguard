@@ -5,7 +5,7 @@ Maintainer: [Alexandre Koch](https://github.com/hazart/generator-pr0d/)
 Based on [yeoman-generator](https://github.com/yeoman/yeoman-generator/)
 
 Inspired by [generator-footguard](https://github.com/mazerte/generator-footguard)
-Thanks to [Mathieu Desvé](https://github.com/mazerte/) for his advices
+thanks to [Mathieu Desvé](https://github.com/mazerte/) for his advices.
 
 ## Usage
 

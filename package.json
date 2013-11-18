@@ -1,6 +1,6 @@
 {
   "name": "generator-pr0d",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Yeoman generator for single page application with backbone framework, coffeescript, jade and stylus",
   "keywords": [
     "yeoman-generator",
@@ -46,8 +46,8 @@
       "type": "BSD"
     }
   ],
-  "readme": "# Pr0d generator\n\nMaintainer: [Alexandre Koch](https://github.com/hazart)\n\nBased on [yeoman-generator](https://github.com/yeoman/yeoman-generator/)\n\n## Usage\n\nFirst make a new directory, and `cd` into it:\n```\nmkdir my-new-project && cd $_\n```\n\nThen install `generator-pr0d`:\n```\nnpm install generator-pr0d\n```\n\nRun `yo pr0d`, optionally passing an app name:\n```\nyo pr0d\n```\n\n## Generators\n\nAvailable generators:\n\n* [pr0d](#app) (aka [footguard:app](#app))\n* [footguard:collection](#collection)\n* [footguard:model](#model)\n* [footguard:helper](#helper)\n* [footguard:view](#view)\n\n## Commands\n\nAvailable commands:\n\n* [grunt](#server)\n* [grunt compile](#compile)\n* [grunt build](#build)\n* [grunt server-dist](#server-dist)\n* [grunt deploy](#deploy)\n* [grunt deploy-preprod](#deploy-preprod)\n* [grunt seo](#seo)\n* [grunt seo-preprod](#seo-preprod)",
+  "readme": "# Pr0d generator\n\nMaintainer: [Alexandre Koch](https://github.com/hazart)\n\nBased on [yeoman-generator](https://github.com/yeoman/yeoman-generator/)\n\nInspired by [generator-footguard](https://github.com/mazerte/generator-footguard)\nthanks to [Mathieu Desvé](https://github.com/mazerte/) for his advices.\n\n## Usage\n\nFirst make a new directory, and `cd` into it:\n```\nmkdir my-new-project && cd $_\n```\n\nThen install `generator-pr0d`:\n```\nnpm install generator-pr0d\n```\n\nRun `yo pr0d`, optionally passing an app name:\n```\nyo pr0d\n```\n\n## Generators\n\nAvailable generators:\n\n* [pr0d](#app) (aka [footguard:app](#app))\n* [footguard:collection](#collection)\n* [footguard:model](#model)\n* [footguard:helper](#helper)\n* [footguard:view](#view)\n\n## Commands\n\nAvailable commands:\n\n* [grunt](#server)\n* [grunt compile](#compile)\n* [grunt build](#build)\n* [grunt server-dist](#server-dist)\n* [grunt deploy](#deploy)\n* [grunt deploy-preprod](#deploy-preprod)\n* [grunt seo](#seo)\n* [grunt seo-preprod](#seo-preprod)",
   "readmeFilename": "readme.md",
-  "_id": "generator-pr0d@0.1.1",
+  "_id": "generator-pr0d@0.1.2",
   "_from": "generator-pr0d"
 }
