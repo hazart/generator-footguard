@@ -10,14 +10,17 @@ define [
 			'' 							: 'home'
 			'*actions' 					: 'home'
 
+		views : {}
+
 		initialize: ()->
 			appView.render()
 			@bind 'route', @_trackPageview
-			# Pour utiliser pushstate il faudrait que requirejs génère des balises scripts avec des sources en /
+			# To use pushstate require should call scripts with an url that start with /
 			Backbone.history.start( {pushState: false} )
 
-		home: (profil)->
+		home: ()->
 			# console.log 'HOME'
+			# I.e. : If you add a home view
 			# @goto view: 'views/home/home_view', callback: (view)->
 
 		goto: ({view, options, callback})->

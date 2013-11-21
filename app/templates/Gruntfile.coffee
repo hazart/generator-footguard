@@ -12,7 +12,6 @@ mountFolder = (connect, dir)->
 	return connect.static(require('path').resolve(dir))
 
 module.exports = (grunt)->
-
 	grunt.loadNpmTasks('grunt-contrib-watch')
 	grunt.loadNpmTasks('grunt-contrib-clean')
 	grunt.loadNpmTasks('grunt-contrib-coffee')
@@ -52,10 +51,6 @@ module.exports = (grunt)->
 		ftp_host_preprod: 'yourftp.com'
 		ftp_dest_preprod: 'test/'
 	}
-
-	try
-		yeomanConfig.app = require('./component.json').appPath || yeomanConfig.app
-	catch e
 
 	#
 	# Grunt configuration:
@@ -109,7 +104,7 @@ module.exports = (grunt)->
 					hostname: '0.0.0.0'
 					middleware: (connect)->
 						return [
-							lrSnippet
+							require('connect-livereload')()
 							mountFolder(connect, yeomanConfig.tmp)
 							mountFolder(connect, yeomanConfig.app)
 						]
