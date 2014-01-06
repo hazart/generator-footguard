@@ -20,9 +20,6 @@ Generator.prototype.askFor = function askFor (argument) {
 	var cb = this.async(),
 		self = this;
 
-	// a bit verbose prompt configuration, maybe we can improve that
-	// demonstration purpose. Also, probably better to have this in other generator, whose responsability is to ask
-	// and fetch all realated bootstrap stuff, that we hook from this generator.
 	var prompts = [{
 		name: 'model',
 		message: 'Would you like to create associate model (' + this.name + ')?',
@@ -36,6 +33,11 @@ Generator.prototype.askFor = function askFor (argument) {
 		name: 'styl',
 		message: 'Would you like to create associate stylus file (' + this.name + ')?',
 		default: 'Y/n'
+	},
+	{
+		name: 'func',
+		message: 'Would you like to create associate functional test file (' + this.name + ')?',
+		default: 'y/N'
 	},
 	{
 		name: 'module',
@@ -74,6 +76,15 @@ Generator.prototype.askFor = function askFor (argument) {
 				self.styl = props.styl;
 			}
 		}
+
+		self.func = false;
+		if( props.func != "y/N" ) {
+			if( props.func == "y" ) {
+				self.func = true;
+			} else if( !(/n/i).test(props.func) ) {
+				self.func = props.func;
+			}
+		}		
 
 		self.module = self.name;
 		if( props.module != "Y/n" ) {
@@ -115,6 +126,10 @@ Generator.prototype.createViewFiles = function createCollectionFiles() {
 		this.template('view.jade', path.join('src/views', this.folder, this.fileName + '.jade'));
 	}
 
+	if( this.func ) {
+		this.template('view_test.coffee', path.join('tests/func/src/views', this.folder, this.fileName + '_test.coffee'));
+	}
+
 	if( this.module ) {
 		var file = 'Gruntfile.coffee';
 		var body = grunt.file.read(file);
@@ -123,7 +138,7 @@ Generator.prototype.createViewFiles = function createCollectionFiles() {
 			needle: '# view modules',
 			haystack: body,
 			splicable: [
-				'						{ name: \'views/'+this.folder+'/'+this.fileName+'_view\', exclude: [\'config\', \'app\', \'vendors\'] }' 
+				'						{ name: \'views/'+this.folder+'/'+this.fileName+'_view\', exclude: [\'vendors\', \'init\', \'app\', \'normalize\'] }' 
 			]
 		});
 		grunt.file.write(file, body);

@@ -7,7 +7,7 @@ define [
 	class Router extends Backbone.Router
 
 		routes:
-			'' 							: 'home'
+			''							: 'home'
 			'*actions' 					: 'home'
 
 		views : {}
@@ -15,13 +15,20 @@ define [
 		initialize: ()->
 			appView.render()
 			@bind 'route', @_trackPageview
-			# To use pushstate require should call scripts with an url that start with /
 			Backbone.history.start( {pushState: false} )
 
+			## Uncomment if you want to use pushState
+			# $(document).on 'click', 'a:not([data-bypass])', (evt) =>
+			# 	href = $(evt.currentTarget).attr('href')
+			# 	protocol = this.protocol + '//'
+			# 	if (href.slice(protocol.length) != protocol)
+			# 		evt.preventDefault()
+			# 		@navigate(href, true)		
+
 		home: ()->
-			# console.log 'HOME'
-			# I.e. : If you add a home view
+			## I.e. : If you add a home view
 			# @goto view: 'views/home/home_view', callback: (view)->
+				# @render()
 
 		goto: ({view, options, callback})->
 			if @views[view]?

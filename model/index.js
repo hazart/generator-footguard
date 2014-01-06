@@ -19,17 +19,57 @@ Generator.prototype.askFor = function askFor (argument) {
 	var cb = this.async(),
 		self = this;
 
-	// a bit verbose prompt configuration, maybe we can improve that
-	// demonstration purpose. Also, probably better to have this in other generator, whose responsability is to ask
-	// and fetch all realated bootstrap stuff, that we hook from this generator.
-	var prompts = [];
+	var prompts = [{
+		name: 'unit',
+		message: 'Would you like to create associate unit test (' + this.name + ')?',
+		default: 'Y/n'
+	}];
   
 	this.prompt(prompts, function(e, props) {
 		if(e) { return self.emit('error', e); }
+		
+		// manually deal with the response, get back and store the results.
+		// We change a bit this way of doing to automatically do this in the self.prompt() method.
+		self.unit = true;
+		if( props.unit != "Y/n" ) {
+			if( props.unit == "n" ) {
+				self.unit = false;
+			} else if( !(/n/i).test(props.unit) ) {
+				self.unit = props.unit;
+			}
+		}
+		
+		// we're done, go through next step
 		cb();
 	});
 };
 
 Generator.prototype.createModelFiles = function createCollectionFiles() {
-	this.template('model.coffee', path.join('src/models', this.name + '_model.coffee'));
+	a = this.name.split("/");
+	if (a.length > 1) {
+		n = a.pop();
+		this.fileName = n;
+		this.folder = a.join('/');
+	} else {
+		this.fileName = this.folder = this.name;
+	}
+
+	this.template('model.coffee', path.join('src','models', this.fileName + '_model.coffee'));
+
+	if( this.unit ) {
+		this.template('model_test.coffee', path.join('tests/unit/src/models', this.fileName + '_test.coffee'));
+
+		var file = path.join('tests','unit','index.html');
+		var body = grunt.file.read(file);
+
+		body = generatorUtil.rewrite({
+			needle: '// <test scripts>',
+			haystack: body,
+			splicable: [
+				'				\'models/'+this.fileName+'_test\','
+			]
+		});
+		grunt.file.write(file, body);
+
+	}
 };

@@ -1,23 +1,10 @@
-pushStateHook = (url) ->
-	path = require('path')
-	request = require('request');
-	return (req, res, next) ->
-		ext = path.extname(req.url)
-		if ((ext is "" or ext is ".html") && req.url != "/")
-			req.pipe(request(url)).pipe(res)
-		else
-			next()
-
-mountFolder = (connect, dir)->
-	return connect.static(require('path').resolve(dir))
-
 module.exports = (grunt)->
 	grunt.loadNpmTasks('grunt-contrib-watch')
 	grunt.loadNpmTasks('grunt-contrib-clean')
 	grunt.loadNpmTasks('grunt-contrib-coffee')
-	grunt.loadNpmTasks('grunt-contrib-concat')
 	grunt.loadNpmTasks('grunt-contrib-connect')
 	grunt.loadNpmTasks('grunt-contrib-copy')
+	grunt.loadNpmTasks('grunt-contrib-concat')
 	grunt.loadNpmTasks('grunt-contrib-cssmin')
 	grunt.loadNpmTasks('grunt-contrib-htmlmin')
 	grunt.loadNpmTasks('grunt-contrib-imagemin')
@@ -25,6 +12,9 @@ module.exports = (grunt)->
 	grunt.loadNpmTasks('grunt-contrib-jade')
 	grunt.loadNpmTasks('grunt-contrib-stylus')
 	grunt.loadNpmTasks('grunt-contrib-requirejs')
+	grunt.loadNpmTasks('grunt-mocha')
+	grunt.loadNpmTasks('grunt-mocha-webdriver')
+	grunt.loadNpmTasks('grunt-mocha-selenium')
 	grunt.loadNpmTasks('grunt-open')
 	grunt.loadNpmTasks('grunt-usemin')
 	grunt.loadNpmTasks('grunt-ftp-deploy')
@@ -33,11 +23,12 @@ module.exports = (grunt)->
 	grunt.loadNpmTasks('grunt-text-replace')
 	grunt.loadNpmTasks('grunt-escaped-seo')
 
-	# configurable paths
+	# configurable variables
 	yeomanConfig = {
 		app: 'assets'
 		src: 'src'
 		dist: 'dist'
+		test: 'tests'		
 
 		tmp: '.tmp'
 		tmp_dist: '.tmp-dist'
@@ -50,6 +41,9 @@ module.exports = (grunt)->
 
 		ftp_host_preprod: 'yourftp.com'
 		ftp_dest_preprod: 'test/'
+
+		saucelabs_username: 'user'
+		saucelabs_key: 'XxxXx-XXxXX'		
 	}
 
 	#
@@ -73,10 +67,11 @@ module.exports = (grunt)->
 					spawn: false
 
 			stylus:
-				files: ['<%= yeoman.src %>/{,**/}*.styl']
+				files: ['<%= yeoman.src %>/views/{,**/}*.styl']
 				tasks: ['stylus:dev','autoprefixer']
 				options: 
 					livereload: true
+					spawn: false
 			
 			jade:
 				files: ['<%= yeoman.src %>/views/{,**/}*.jade']
@@ -92,9 +87,35 @@ module.exports = (grunt)->
 					'<%= yeoman.app %>/css/{,**/}*.css'
 					'<%= yeoman.app %>/js/{,**/}*.js'
 					'<%= yeoman.app %>/images/{,**/}*.{png,jpg,jpeg}'
+					'<%= yeoman.test %>/{,**/}*.js'
 				]
 				options:
 					livereload: true
+
+			dist:
+				files: [
+					'<%= yeoman.dist %>/{,**/}*.{css,js,html,png,jpg,jpeg}'
+				]
+				options:
+					livereload: false
+
+			unit:
+				files: [
+					'<%= yeoman.test %>/unit/{,**/}*.coffee'
+				]
+				tasks: ['coffee:unit','mocha:test']
+				options: 
+					livereload: false
+					spawn: false
+
+			func:
+				files: [
+					'<%= yeoman.test %>/func/{,**/}*.coffee'
+				]
+				tasks: ['coffee:func','mochaSelenium']
+				options: 
+					livereload: false
+					spawn: false
 
 		connect:
 			dev:
@@ -102,11 +123,16 @@ module.exports = (grunt)->
 					port: 9000
 					# Change this to 'localhost' to access the server only local.
 					hostname: '0.0.0.0'
+					livereload: true
 					middleware: (connect)->
 						return [
-							require('connect-livereload')()
-							mountFolder(connect, yeomanConfig.tmp)
-							mountFolder(connect, yeomanConfig.app)
+							require('connect-modrewrite')([
+								'/?(components/.*)$  /$1 [L]'
+								'.*/?(js/.*)$  /$1 [L]'
+								'!\\.(.*)$ / [L]'
+							])
+							connect.static(require('path').resolve(yeomanConfig.tmp))
+							connect.static(require('path').resolve(yeomanConfig.app))
 						]
 			dist:
 				options:
@@ -115,14 +141,32 @@ module.exports = (grunt)->
 					hostname: '0.0.0.0'
 					middleware: (connect)->
 						return [
-							mountFolder(connect, yeomanConfig.dist)
+							require('connect-modrewrite')([
+								'/?(components/.*)$  /$1 [L]'
+								'.*/?(js/.*)$  /$1 [L]'
+								'!\\.(.*)$ / [L]'
+							])
+							connect.static(require('path').resolve(yeomanConfig.dist))
 						]
+			test:
+				options:
+					port: 9002
+					hostname: '0.0.0.0'
+					livereload: true
+					middleware: (connect)->
+						return [
+							connect.static(require('path').resolve(yeomanConfig.test+"/unit/"))
+							connect.static(require('path').resolve(yeomanConfig.tmp))
+							connect.static(require('path').resolve(yeomanConfig.app))
+						]				
 
 		open:
 			dev:
 				path: 'http://localhost:<%= connect.livereload.options.port %>'
 			dist:
 				path: 'http://localhost:<%= connect.dist.options.port %>'
+			test:
+				path: 'http://localhost:<%= connect.test.options.port %>'
 
 		clean:
 			dist: ['<%= yeoman.dist %>']
@@ -130,8 +174,8 @@ module.exports = (grunt)->
 			tmp_dist: ['<%= yeoman.tmp_dist %>']
 			components: ['<%= yeoman.dist %>/components']
 			templates: ['<%= yeoman.dist %>/templates']
-			css: ['<%= yeoman.dist %>/css/main.css']
-			js: ['<%= yeoman.dist %>/js/main.js']
+			js: ['<%= yeoman.dist %>/js/config/init.js']
+			build: ['<%= yeoman.dist %>/build.txt']
 
 		coffee:
 			dev:
@@ -141,16 +185,34 @@ module.exports = (grunt)->
 				dest: '<%= yeoman.tmp %>/js'
 				ext: '.js'
 				options: 
-					runtime: 'inline',
+					runtime: 'inline'
 					sourceMap: true
 			dist:
 				expand: true
-				cwd: '<%= yeoman.src %>'
+				cwd: '<%= yeoman.src %>/'
 				src: ['**/*.coffee']
 				dest: '<%= yeoman.tmp %>/js'
 				ext: '.js'
 				options: 
-					runtime: 'inline',
+					runtime: 'inline'
+					sourceMap: false
+			unit:
+				expand: true
+				cwd: '<%= yeoman.test %>/unit/src'
+				src: ['**/*.coffee']
+				dest: '<%= yeoman.test %>/unit/js'
+				ext: '.js'
+				options: 
+					runtime: 'inline'
+					sourceMap: false
+			func:
+				expand: true
+				cwd: '<%= yeoman.test %>/func/src'
+				src: ['**/*.coffee']
+				dest: '<%= yeoman.test %>/func/js'
+				ext: '.js'
+				options: 
+					runtime: 'inline'
 					sourceMap: false
 
 		stylus:
@@ -158,24 +220,38 @@ module.exports = (grunt)->
 				options:
 					# linenos: true
 					# firebug: true
+					sourcemaps: true
 					compress: false
 					paths: ['<%= yeoman.src %>']
 					urlfunc: 'embedurl'
-					import: ['main.styl', 'helpers/stylus_mixin.styl']
-				files:
-					'<%= yeoman.tmp %>/css/main.css': '<%= yeoman.src %>/views/**/*.styl'
+					import: ['config/config.styl', 'helpers/stylus_mixin.styl']
+				files: [
+					expand: true
+					cwd: '<%= yeoman.src %>/views'
+					src: ['**/*.styl']
+					dest: '<%= yeoman.tmp %>/templates'
+					ext: '.css'
+				]
+
 			dist:
 				options:
 					paths: ['<%= yeoman.src %>']
 					urlfunc: 'embedurl'
-					import: ['main.styl', 'helpers/stylus_mixin.styl']
-				files:
-					'<%= yeoman.tmp %>/css/main.css': '<%= yeoman.src %>/views/**/*.styl'
+					import: ['config/config.styl', 'helpers/stylus_mixin.styl']
+				files: [
+					expand: true
+					cwd: '<%= yeoman.src %>/views'
+					src: ['**/*.styl']
+					dest: '<%= yeoman.tmp %>/templates'
+					ext: '.css'
+				]
 
 		autoprefixer:
-			single_file:
-				src: '<%= yeoman.tmp %>/css/main.css',
-				dest: '<%= yeoman.tmp %>/css/main.css'
+			options:
+				browsers: ['last 3 version', 'ie 8']
+			all: 
+				expand: true
+				src: '<%= yeoman.tmp %>/templates/**/*.css'
 
 		jade: 
 			dev: 
@@ -202,6 +278,7 @@ module.exports = (grunt)->
 					dest: '<%= yeoman.tmp %>/templates'
 					ext: '.html'
 				]
+
 		copy:
 			dist:
 				files: [
@@ -258,6 +335,8 @@ module.exports = (grunt)->
 
 		uglify:
 			dist:
+				# options:
+				# 	report: 'gzip'
 				files:[{
 					expand: true,
 					cwd: '<%= yeoman.dist %>',
@@ -270,19 +349,19 @@ module.exports = (grunt)->
 				options:
 					# no minification, is done by the min task
 					baseUrl: 'js/'
-					mainConfigFile: '<%= yeoman.tmp_dist %>/js/main.js'
 					appDir: './<%= yeoman.tmp_dist %>/'
 					dir: './<%= yeoman.dist %>/'
 					wrap: true
 					removeCombined: true
 					keepBuildDir: true
 					inlineText: true
+					mainConfigFile: '<%= yeoman.tmp_dist %>/js/config/init.js'
 					optimize: ""
 
 					modules: [
 						{ name: 'vendors', exclude: [] }
-						{ name: 'app', exclude: ['vendors'] }
-						{ name: 'main', exclude: ['config', 'app', 'vendors'] }
+						{ name: 'init', exclude: ['vendors', 'normalize'] }
+						{ name: 'app', exclude: ['init', 'vendors', 'normalize'] }
 						# view modules
 					]
 
@@ -341,22 +420,83 @@ module.exports = (grunt)->
 				dest: '<%= yeoman.ftp_dest_preprod %>'
 				exclusions: ['dist/**/.DS_Store', 'dist/**/Thumbs.db', 'dist/build.txt']
 
-		notify: 
-			watch: 
-				options: 
-					title: 'Task Complete',  # optional
-					message: 'Watch finished running', # required
-					
+		notify: 	
 			server: 
 				options:
-					message: 'Server is ready!'	
+					message: 'Server is ready!'					
+
+			build: 
+				options:
+					# title: 'Task Complete', 
+					message: 'Build is finished!'
+
+		mocha:
+			test:
+				options:
+					mocha:
+						ignoreLeaks: false
+					urls: ['http://localhost:<%= connect.test.options.port %>/']
+					run: false
+					reporter: 'Spec'
+					log: true
+					timeout: 60000
+
+		mochaSelenium:
+			options:
+				timeout: 1000 * 60
+				reporter: 'spec'
+				useChaining: true
+			phantom:
+				src: ['<%= yeoman.test %>/func/**/*.js']
+				options:
+					browserName: 'phantomjs'
+			# firefox:
+			# 	src: ['<%= yeoman.test %>/func/**/*.js']
+			# chrome:
+			# 	src: ['<%= yeoman.test %>/func/**/*.js']
+			# 	options:
+			# 		browserName: 'chrome'
+
+		mochaWebdriver:
+			options:
+				timeout: 1000 * 60
+				reporter: 'spec'
+				usePromises: true
+				tunnelTimeout: 1000 * 180
+				username: '<%= yeoman.saucelabs_username %>'
+				key: '<%= yeoman.saucelabs_key %>'
+			# phantom:
+			# 	src: ['<%= yeoman.test %>/func/**/*.js']
+			# 	options:
+			# 		testName: 'phantom test'
+			# 		usePhantom: true
+			saucePromises:
+				src: ['<%= yeoman.test %>/func/**/*.js']
+				options:
+					testName: 'PR0D sauce promises test 2'
+					concurrency: 2
+					usePromises: true
+					browsers: [
+						# {browserName: 'internet explorer', platform: 'Windows 7', version: '9'}
+						# {browserName: 'internet explorer', platform: 'Windows 7', version: '8'}
+						{browserName: 'chrome', platform: 'Windows 7', version: ''}
+					]
 
 	grunt.event.on('watch', (action, filepath, target) ->
+		src = new RegExp('^'+yeomanConfig.src+'[\\/\\\\]', 'i');
+		srcViews = new RegExp('^'+yeomanConfig.src+'[\\/\\\\]'+'views'+'[\\/\\\\]', 'i');
+
 		if (target is 'coffee' and grunt.file.isMatch( grunt.config('watch.coffee.files'), filepath))
-			grunt.config(['coffee', 'dev', 'src'], [filepath.replace(yeomanConfig.src+'/','')])
+			grunt.config(['coffee', 'dev', 'src'], [filepath.replace(src,'')])
+
+		if (target is 'coffee' and grunt.file.isMatch( grunt.config('watch.coffee.unit'), filepath))
+			grunt.config(['coffee', 'unit', 'src'], [filepath.replace(src,'')])
+
+		if (target is 'coffee' and grunt.file.isMatch( grunt.config('watch.coffee.func'), filepath))
+			grunt.config(['coffee', 'func', 'src'], [filepath.replace(src,'')])
 
 		if (target is 'jade' and grunt.file.isMatch( grunt.config('watch.jade.files'), filepath))
-			fp = filepath.replace(yeomanConfig.src+'/views/','')
+			fp = filepath.replace(srcViews,'')
 			grunt.config(['jade', 'dev', 'files'], [
 					expand: true
 					cwd: '<%= yeoman.src %>/views'
@@ -364,6 +504,11 @@ module.exports = (grunt)->
 					dest: '<%= yeoman.tmp %>/templates'
 					ext: '.html'
 				])
+
+		if (target is 'stylus' and grunt.file.isMatch( grunt.config('watch.stylus.files'), filepath))
+			fp = filepath.replace(srcViews,'')
+			grunt.config(['stylus', 'dev', 'files', '0', 'src'], [filepath.replace(srcViews,'')])
+			grunt.config(['autoprefixer', 'all', 'src'], '<%= yeoman.tmp %>/' + filepath.replace(srcViews,'templates/').replace('.styl','.css'))
 	)
 
 	grunt.registerTask('server', [
@@ -372,41 +517,8 @@ module.exports = (grunt)->
 		'autoprefixer'
 		'jade:dev'
 		'connect:dev'
-		# 'open:dev'
-		'watch'
 		'notify:server'
-	])
-
-	grunt.registerTask('server-dist', [
-		'connect:dist'
-		'open:dist'
 		'watch'
-	])
-
-	grunt.registerTask('compile', [
-		'jade:dist'
-		'coffee:dist'
-		'stylus:dist'
-		'autoprefixer'
-	])
-
-	grunt.registerTask('seo', [
-		'connect:dist'
-		'escaped-seo:prod'
-	])
-
-	grunt.registerTask('seo-preprod', [
-		'connect:dist'
-		'escaped-seo:preprod'
-	])
-
-	grunt.registerTask('deploy', [
-		'replace:nodev'
-		'ftp-deploy:prod'
-	])
-
-	grunt.registerTask('deploy-preprod', [
-		'ftp-deploy:preprod'
 	])
 
 	grunt.registerTask('build', [
@@ -423,14 +535,63 @@ module.exports = (grunt)->
 		'concat'
 		'usemin'
 		'requirejs:compile'
-		'clean:css'
 		'cssmin'
 		'clean:js'
 		'clean:tmp_dist'
 		'clean:components'
 		'clean:templates'
-		'uglify'
+		'clean:build'
+		'uglify:dist'
+		'connect:dist'
+		'notify:build'
+		'watch:dist'
 	])
+
+	grunt.registerTask('server-dist', [
+		'connect:dist'
+		'open:dist'
+		'watch:dist'
+	])
+
+	grunt.registerTask('seo', [
+		'connect:dist'
+		'escaped-seo:prod'
+	])
+
+	grunt.registerTask('seo-preprod', [
+		'connect:dist'
+		'escaped-seo:preprod'
+	])
+
+	grunt.registerTask('deploy', [
+		'replace:close'
+		'replace:nodev'
+		'ftp-deploy:prod'
+	])
+
+	grunt.registerTask('test-unit', [
+		'coffee:dev'
+		'coffee:unit'
+		'connect:test'
+		'mocha:test'
+		'watch:unit'
+	])
+
+	grunt.registerTask('test-selenium', [
+		'coffee:func'
+		'mochaSelenium'
+		'watch:func'
+	])
+
+	grunt.registerTask('test-sauce', [
+		'coffee:func'
+		'mochaWebdriver'
+	])
+
+	grunt.registerTask('deploy-preprod', [
+		'ftp-deploy:preprod'
+	])
+
 	grunt.option('force', true)
 
-	grunt.registerTask('default', ['server'])	
+	grunt.registerTask('default', ['server'])

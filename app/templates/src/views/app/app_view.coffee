@@ -3,7 +3,8 @@ define [
 	'underscore'
 	'config'
 	'text!templates/app/app.html'
-], (Backbone, _, Config, tpl)->
+	'css!templates/app/app.css'
+], (Backbone, _, Config, tpl, css)->
 
 	class App extends Backbone.View
 		

@@ -37,16 +37,19 @@ Available generators:
 * [pr0d:collection](#collection)
 * [pr0d:model](#model)
 * [pr0d:view](#view)
+* [pr0d:helper](#helper)
 
 ## Commands
 
 Available commands:
 
 * [grunt](#server)
-* [grunt server-dist](#server-dist)
-* [grunt compile](#compile)
 * [grunt build](#build)
+* [grunt server-dist](#server-dist)
 * [grunt seo](#seo)
 * [grunt seo-preprod](#seo-preprod)
 * [grunt deploy](#deploy)
 * [grunt deploy-preprod](#deploy-preprod)
+* [grunt test-unit](#test-unit)
+* [grunt test-selenium](#test-selenium)
+* [grunt test-sauce](#test-sauce)

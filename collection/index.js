@@ -27,6 +27,11 @@ Generator.prototype.askFor = function askFor (argument) {
 		name: 'model',
 		message: 'Would you like to create associate model (' + grunt.util._.singularize(this.name) + ')?',
 		default: 'y/N',
+	},
+	{
+		name: 'unit',
+		message: 'Would you like to create associate unit test (' + this.name + ')?',
+		default: 'Y/n'
 	}];
 
 	this.prompt(prompts, function(e, props) {
@@ -43,7 +48,14 @@ Generator.prototype.askFor = function askFor (argument) {
 			}
 		}
 		
-		self.test = (/y/i).test(props.test);
+		self.unit = true;
+		if( props.unit != "Y/n" ) {
+			if( props.unit == "n" ) {
+				self.unit = false;
+			} else if( !(/n/i).test(props.unit) ) {
+				self.unit = props.unit;
+			}
+		}
 		
 		// we're done, go through next step
 		cb();
@@ -68,6 +80,24 @@ Generator.prototype.createCollectionFiles = function createCollectionFiles() {
 	if( this.model ) {
 		mg = new ModelGenerator(this.options);
 		mg.name = this.modelName;
+		mg.unit = this.unit;
 		mg.createModelFiles();
 	}
+
+	if( this.unit ) {
+		this.template('collection_test.coffee', path.join('tests/unit/src/collections', this.fileName + '_test.coffee'));
+
+		var file = path.join('tests','unit','index.html');
+		var body = grunt.file.read(file);
+
+		body = generatorUtil.rewrite({
+			needle: '// <test scripts>',
+			haystack: body,
+			splicable: [
+				'				\'collections/'+this.fileName+'_test\','
+			]
+		});
+		grunt.file.write(file, body);
+
+	}	
 };
