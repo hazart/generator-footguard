@@ -5,6 +5,7 @@ var path = require('path'),
 	ScriptBase = require('../script-base.js'),
 	generatorUtil = require('../util.js'),
 	ModelGenerator = require('../model/index.js');
+	helpers = require('yeoman-generator').test;	
 
 grunt.util._.mixin( require('underscore.inflections') );
 
@@ -45,11 +46,7 @@ Generator.prototype.askFor = function askFor (argument) {
 		default: 'Y/n'
 	}];
   
-	this.prompt(prompts, function(e, props) {
-		if(e) { return self.emit('error', e); }
-		
-		// manually deal with the response, get back and store the results.
-		// We change a bit this way of doing to automatically do this in the self.prompt() method.
+	this.prompt(prompts, function(props) {
 		self.model = false;
 		if( props.model != "y/N" ) {
 			if( props.model == "y" ) {
@@ -113,9 +110,15 @@ Generator.prototype.createViewFiles = function createCollectionFiles() {
 	this.template('view.coffee', 'src/views/' + this.folder + "/" + this.fileName + '_view.coffee');
 	
 	if( this.model ) {
-		mg = new ModelGenerator(this.options);
-		mg.name = this.fileName;
-		mg.createModelFiles();
+		mg = new helpers.createGenerator(
+			'pr0d:model',
+      			[__dirname + '/../model'],
+      			[this.fileName, this.folder]
+      		);
+      		helpers.mockPrompt(mg, {
+			unit: this.unit ? 'y' : 'n'
+		});
+		mg.run();
 	}
 	
 	if( this.styl ) {

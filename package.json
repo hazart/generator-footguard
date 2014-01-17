@@ -1,6 +1,6 @@
 {
   "name": "generator-pr0d",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Yeoman generator for Single Page Application with Backbone framework, coffeescript, jade and stylus",
   "keywords": [
     "yeoman-generator",

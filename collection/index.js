@@ -1,10 +1,10 @@
 /*jshint latedef:false */
 var path = require('path'),
-util = require('util'),
-grunt = require('grunt'),
-ScriptBase = require('../script-base.js'),
-generatorUtil = require('../util.js'),
-helpers = require('yeoman-generator').test;
+	util = require('util'),
+	grunt = require('grunt'),
+	ScriptBase = require('../script-base.js'),
+	generatorUtil = require('../util.js'),
+	helpers = require('yeoman-generator').test;
 
 grunt.util._.mixin( require('underscore.inflections') );
 
@@ -26,21 +26,19 @@ Generator.prototype.askFor = function askFor (argument) {
 	var prompts = [{
 		name: 'model',
 		message: 'Would you like to create associate model (' + grunt.util._.singularize(this.name) + ')?',
-		default: 'y/N',
+		default: 'Y/n',
 	},
 	{
 		name: 'unit',
 		message: 'Would you like to create associate unit test (' + this.name + ')?',
-		default: 'Y/n'
+		default: 'y/N'
 	}];
 
-	this.prompt(prompts, function(e, props) {
-		if(e) { return self.emit('error', e); }
-		
+	this.prompt(prompts, function(props) {		
 		// manually deal with the response, get back and store the results.
 		// We change a bit this way of doing to automatically do this in the self.prompt() method.
-		self.model = false;
-		if( props.model != "y/N" ) {
+		self.model = true;
+		if( props.model != "Y/n" ) {
 			if( props.model == "y" ) {
 				self.model = grunt.util._.singularize(self.name);
 			} else if( !(/n/i).test(props.model) ) {
@@ -48,16 +46,15 @@ Generator.prototype.askFor = function askFor (argument) {
 			}
 		}
 		
-		self.unit = true;
-		if( props.unit != "Y/n" ) {
+		self.unit = false;
+		if( props.unit != "y/N" ) {
 			if( props.unit == "n" ) {
 				self.unit = false;
 			} else if( !(/n/i).test(props.unit) ) {
 				self.unit = props.unit;
 			}
 		}
-		
-		// we're done, go through next step
+
 		cb();
 	});
 };
@@ -79,12 +76,12 @@ Generator.prototype.createCollectionFiles = function createCollectionFiles() {
 	
 	if( this.model ) {
 		mg = new helpers.createGenerator(
-			'footguard:model',
-      			[__dirname + '../model'],
-      			[this.name, this.folder]
+			'pr0d:model',
+      			[__dirname + '/../model'],
+      			[this.modelName, this.folder]
       		);
       		helpers.mockPrompt(mg, {
-			test: this.test ? 'y' : 'n'
+			unit: this.unit ? 'y' : 'n'
 		});
 		mg.run();
 	}

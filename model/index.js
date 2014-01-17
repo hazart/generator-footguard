@@ -18,18 +18,13 @@ util.inherits(Generator, ScriptBase);
 Generator.prototype.askFor = function askFor (argument) {
 	var cb = this.async(),
 		self = this;
-
 	var prompts = [{
 		name: 'unit',
 		message: 'Would you like to create associate unit test (' + this.name + ')?',
 		default: 'Y/n'
 	}];
   
-	this.prompt(prompts, function(e, props) {
-		if(e) { return self.emit('error', e); }
-		
-		// manually deal with the response, get back and store the results.
-		// We change a bit this way of doing to automatically do this in the self.prompt() method.
+	this.prompt(prompts, function(props) {
 		self.unit = true;
 		if( props.unit != "Y/n" ) {
 			if( props.unit == "n" ) {
@@ -44,7 +39,11 @@ Generator.prototype.askFor = function askFor (argument) {
 	});
 };
 
-Generator.prototype.createModelFiles = function createCollectionFiles() {
+Generator.prototype.createModelFiles = function createModel(name, folder, unit) {
+  	name = name || this.name;
+  	folder = folder || this.folder;
+  	unit = unit || this.unit;
+	
 	a = this.name.split("/");
 	if (a.length > 1) {
 		n = a.pop();
