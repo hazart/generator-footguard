@@ -4,7 +4,7 @@ util = require('util'),
 grunt = require('grunt'),
 ScriptBase = require('../script-base.js'),
 generatorUtil = require('../util.js'),
-ModelGenerator = require('../model/index.js');
+helpers = require('yeoman-generator').test;
 
 grunt.util._.mixin( require('underscore.inflections') );
 
@@ -78,10 +78,15 @@ Generator.prototype.createCollectionFiles = function createCollectionFiles() {
 	this.template('collection.coffee', path.join('src/collections', this.folder, this.fileName + '_collection.coffee'));
 	
 	if( this.model ) {
-		mg = new ModelGenerator(this.options);
-		mg.name = this.modelName;
-		mg.unit = this.unit;
-		mg.createModelFiles();
+		mg = new helpers.createGenerator(
+			'footguard:model',
+      			[__dirname + '../model'],
+      			[this.name, this.folder]
+      		);
+      		helpers.mockPrompt(mg, {
+			test: this.test ? 'y' : 'n'
+		});
+		mg.run();
 	}
 
 	if( this.unit ) {
